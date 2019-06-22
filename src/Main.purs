@@ -1,30 +1,17 @@
-module Main where
+module App where
 
 import Effect.Console
 import Effect (Effect)
 import Prelude
 import Signal
-import Signal.Channel (channel, send)        
+import Signal.Channel
+import Signal.Channel       (send, subscribe)
+type Count =
+  { click :: Int }
 
+action :: Count -> Count
+action c = {click: c.click + 1}
 
-type Entry =
-  { firstName :: String
-  , lastName  :: String
-  , address   :: Address
-  }
-type Address =
-  { street :: String
-  , city   :: String
-  , state  :: String
-  }
-
-addr :: Address
-addr = {street: "hehe", city: "cc", state: "ss"}
-
-hello :: Signal Address
-hello = constant addr
-
-helloEffect :: Signal (Effect Unit)
-helloEffect = hello ~> log <<< show
-
-main = runSignal helloEffect
+subChannel :: Channel (Count -> Count) -> ((Count -> Count) -> Unit) -> Effect Unit
+subChannel ch ss = runSignal $ (subscribe ch) ~> pure <<< ss
+  
