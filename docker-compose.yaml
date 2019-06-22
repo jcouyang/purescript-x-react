@@ -1,0 +1,24 @@
+version: '3.4'
+
+services:
+  jsapp:
+    image: node:10
+    working_dir: /app
+    user: node
+    environment:
+      PATH: ./node_modules/.bin:$PATH
+    command: yarn start
+    volumes:
+      - .:/app
+    ports:
+      - 3000:3000
+  purs:
+    image: node:10
+    working_dir: /app
+    user: node
+    environment:
+      PATH: ./node_modules/.bin:$PATH
+    command: pulp -w build -o src/actions
+    volumes:
+      - .:/app
+
