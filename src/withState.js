@@ -2,25 +2,28 @@ import React from 'react';
 import {send, subscribe, channel} from './purs/Signal.Channel'
 import {unsafePerformEffect} from './purs/Effect.Unsafe'
 import {pure} from "./purs/Control.Applicative"
-import {applicativeEffect} from "./purs/Effect"
+import Effect, {applicativeEffect} from "./purs/Effect"
+import {runAff_} from "./purs/Effect.Aff"
 import Signal, {functorSignal} from "./purs/Signal"
 
-function subChannel(ch) {
-    return function (setState) {
-        return Signal.runSignal(
-            Signal.flippedMap(functorSignal)(
-                subscribe(ch)
-            )(fn => pure(applicativeEffect)(setState(fn)))
-        )
-    }
+function performEff(eff, setState) {
+  if(eff && eff.tag && eff.tag === 'Async'){
+    return unsafePerformEffect(runAff_(a=>{
+      if(a.value0) return ()=>setState(a.value0)
+      else return ()=>{
+        console.error('meh..')
+      }
+    })(eff))
+  }else if(typeof(eff) === 'function'){
+    return setState(unsafePerformEffect(eff))
+  }
 }
 
 export default function withState(WrappedComponent, initState, initAction) {
-    const doNothing = a => a
+    const doNothing = a => pure(applicativeEffect)(a)
     const context = React.createContext({
         state: initState,
-        dispatch: () => {
-        }
+        dispatch: () => pure(applicativeEffect)({})
     })
 
     class Component extends React.Component {
@@ -31,9 +34,14 @@ export default function withState(WrappedComponent, initState, initAction) {
         }
 
         componentDidMount() {
-            const setState = this.setState.bind(this)
-            unsafePerformEffect(subChannel(this.channel)(setState))
+            unsafePerformEffect(this.subscribeChannel())
         }
+      subscribeChannel() {
+        return Signal.runSignal(
+            Signal.flippedMap(functorSignal)(
+              subscribe(this.channel)
+            )(fn => pure(applicativeEffect)(performEff(fn(this.state), this.setState.bind(this)))))
+      }
 
         render() {
             return (
