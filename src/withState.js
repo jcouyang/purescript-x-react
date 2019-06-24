@@ -7,15 +7,20 @@ import {runAff_} from "./purs/Effect.Aff"
 import Signal, {functorSignal} from "./purs/Signal"
 
 function performEff(eff, setState) {
-  if(eff && eff.tag && eff.tag === 'Async'){
+  if(eff && eff.tag){
     return unsafePerformEffect(runAff_(a=>{
-      if(a.value0) return ()=>setState(a.value0)
+      if(a.value0) {
+        console.debug("updateting state to:", a.value0)
+       return ()=>setState(a.value0) 
+      }
       else return ()=>{
         console.error('meh..')
       }
     })(eff))
   }else if(typeof(eff) === 'function'){
-    return setState(unsafePerformEffect(eff))
+    let newState = unsafePerformEffect(eff)
+    console.debug("updateting state to:", newState)
+    return setState(newState)
   }
 }
 

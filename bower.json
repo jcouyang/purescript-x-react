@@ -13,7 +13,9 @@
     "purescript-aff": "^5.1.1",
     "purescript-affjax": "^9.0.0",
     "purescript-argonaut": "^6.0.0",
-    "purescript-foreign-generic": "^10.0.0"
+    "purescript-foreign-generic": "^10.0.0",
+    "purescript-profunctor-lenses": "^6.2.0",
+    "purescript-newtype": "^3.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^4.0.0"
