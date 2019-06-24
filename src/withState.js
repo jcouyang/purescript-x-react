@@ -1,10 +1,10 @@
 import React from 'react';
-import {send, subscribe, channel} from './purs/Signal.Channel'
-import {unsafePerformEffect} from './purs/Effect.Unsafe'
-import {pure} from "./purs/Control.Applicative"
-import Effect, {applicativeEffect} from "./purs/Effect"
-import {runAff_} from "./purs/Effect.Aff"
-import Signal, {functorSignal} from "./purs/Signal"
+import {send, subscribe, channel} from 'purs/Signal.Channel'
+import {unsafePerformEffect} from 'purs/Effect.Unsafe'
+import {pure} from "purs/Control.Applicative"
+import {applicativeEffect} from "purs/Effect"
+import {runAff_} from "purs/Effect.Aff"
+import Signal, {functorSignal} from "purs/Signal"
 
 function performEff(eff, setState) {
   if(eff && eff.tag){

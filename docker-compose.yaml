@@ -18,7 +18,7 @@ services:
     user: node
     environment:
       PATH: ./node_modules/.bin:$PATH
-    command: pulp -w build -o src/purs
+    command: pulp -w build -o node_modules/purs
     volumes:
       - .:/app
 
