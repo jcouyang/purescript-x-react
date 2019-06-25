@@ -1,0 +1,170 @@
+#+Title: PureScript x React
+#+Date: <2019-06-25 Tue>
+#+Author: Jichao Ouyang
+
+#+BEGIN_QUOTE
+Core logic written in PureScript, with the user interface written in JavaScript.
+  -- [[https://leanpub.com/purescript/read#leanpub-auto-polyglot-web-programming][PureScript by Example]]
+#+END_QUOTE
+
+This is not a library
+
+This is not a library that wrap React into PureScript, if you looking for wrapper try [[https://pursuit.purescript.org/packages/purescript-react][purescript-react]]
+
+This is just a Demo to show you how to make clear boundary between user interface and it's logic
+
+Where user interface implement in React, logic live in type safe PureScript
+
+* How
+Most of you may take the opposite way to wrap React into your favorite language.
+
+But that is as wrong as adding type check to HTML
+
+to verify an HTML is correct, you just need to check the schema, all tags are valid and closed
+no one care what type =<h1></h1>= has. As long as the schema correct, it should
+able to render properly, that's most import as a user interface, it renders.
+
+Same thing to React, as long as it renders properly, that's enough.
+
+It's the thing that happen behind i.e. =onClick=, is where business started.
+
+So only model business with type correctly, will give you the benefit of type system.
+
+Let us try to factor React out and only used as a markup language.
+
+#+BEGIN_SRC javascript
+  const App = (props) => {
+    const {state, dispatch} = useContext(context)
+    return <div className="App">
+      <header className="App-header">
+        <h1>{props.word}</h1>
+        <button onClick={() => {
+          dispatch(remoteLoad)
+        }}>async reset</button>
+        <button onClick={() => {
+          dispatch(action)
+        }}>+</button>
+      <i>{state.id}</i>
+      </header>
+    </div>
+  }
+#+END_SRC
+
+For instance we have a simple interface of two button and a counter
+
+This is just like markup, it describes what it should display
+
+The logic part happen in
+#+BEGIN_SRC javascript
+        onClick={() => {
+          dispatch(remoteLoad)
+        }}
+#+END_SRC
+
+What we need to do is to load a JSON remotely, and update the React component's
+state.
+
+There could be lot of thing happen unexpectedly like:
+- server response no OK
+- JSON schema not match
+- empty JSON body
+- requseted URI is incorrect or undefined
+
+all these cases, when using JavaScript, you need to keep them in mind and writing test and protection
+code around the core logic(which is just sending the request and update state).
+
+#+BEGIN_SRC javascript
+  function remoteLoad(currentState) {
+    return fetch(config.uri + "/todos/1")
+      .then(response => response.json())
+      .then(newState=>{
+        if(newState && newState.id){
+          return newState
+        } else{
+          return currentState
+        }
+      })
+      .catch(error=>console.error("something wrong when query", error))
+  }
+#+END_SRC
+
+But when we using PureScript to model the same problem, type system will force
+you to handle all those cases otherwise it won't even compile.
+
+#+BEGIN_SRC haskell
+remoteLoad :: Data -> Aff Data
+remoteLoad c = do
+  resp <- fetch config.uri
+  case runExcept $ genericDecodeJSON opts resp :: _ Data of
+    Right a -> pure a
+    Left err -> throwError $ error $ show err
+#+END_SRC
+
+i.e. if
+- you forgot to handle error case in =Left=, compile error
+- server response JSON does not have =id= in it, run time error, but =genericDecodeJSON=
+already generate runtime checker base on the =Data= type you defined.
+
+So basically it give you the confidence of
+- if your code read data from out side world,
+but does not match your data type, it fail fast so the rest of the code won't get executed.
+- if data can form your data type, then everything else is already type checked so no runtime
+error could possible happen.
+
+* But
+** Why React?
+*** React has good eco system
+We can basically find what ever component we need thanks to React community
+
+So it's just like a dynamic widget-ized version of HTML, with it you can
+define reactive component very fast.
+
+For example most company may have a dedicated team to maintain an organization
+level of UI components(in most case is React) which are styled and branded in their own way.
+
+So to reuse those components, the most well supported language is JavaScript
+or TypeScript.
+
+** Why not just React?
+But those languages are not really type safe, which means even for TypeScript
+it can not find most error at compile time. From my experience it provide better
+developer IDE support better than guarantee of type safety.
+
+So I like to have some language just like Scala/Haskell which can provide me
+the confidence of type safety. i.e. if I model the business properly in Scala, I'm very
+confidence all the corner cases should be forced to handle properly by the compiler.
+** Why PureScript then, what about the other languages
+There are lot of options for language provide compile time checking:
+- PureScript
+- Scala.js
+- GHCJS
+- Elm
+- TypeScript
+- ReasonML
+
+Why PureScript is outstanding?
+
+I don't know which one is the best fit for me, but I know exactly what doesn't
+*** Fully Functional Type System
+If you are looking for language that has fully functional type system just like Scala or Haskell
+then *Elm and TypeScript are off my list*
+
+A fully functional type system mean it should able to model Category Theory
+properly at compile time.
+*** Size of output
+If size of the output JavaScript is a concern then
+*Scala.js, GHCJS* are off my list
+
+*** JavaScript Interop
+ This is very important since if we want to draw a clear boundary between
+React and other language, then we need good support to import that language's
+module into JavaScript code and vice versa so that language can also get
+the benefit from the popular and well supported JavaScript community.
+
+So *Scala.js, GHCJS, Elm* are off my list
+
+*** So
+There are only PureScript and ReasonML survived. sorry I'm not big fan of
+OCaml syntax so PureScript is probably what I wanted.
+
+
