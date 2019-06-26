@@ -16,15 +16,15 @@ This is just a Demo to show you how to make clear boundary between user interfac
 Where user interface implement in React, logic live in type safe PureScript
 
 * How
-Most of you may take the opposite way to wrap React into your favorite language.
+Most of type enthusiast may take the opposite way to wrap React into your favorite language.
 
-But that is as wrong as adding type check to HTML
+However that is IMHO as wrong as adding type check to HTML
 
 to verify an HTML is correct, you just need to check the schema, all tags are valid and closed
 no one care what type =<h1></h1>= has. As long as the schema correct, it should
 able to render properly, that's most import as a user interface, it renders.
 
-Same thing to React, as long as it renders properly, that's enough.
+Same thing to React, as long as it renders properly(react compiler already checked that for us), that's enough.
 
 It's the thing that happen behind i.e. =onClick=, is where business started.
 
@@ -147,16 +147,17 @@ Why PureScript is outstanding?
 I don't know which one is the best fit for me, but I know exactly what doesn't
 *** Fully Functional Type System
 If you are looking for language that has fully functional type system just like Scala or Haskell
-then *Elm and TypeScript are off my list*
+then *Elm, ReasonML and TypeScript are off my list*
 
 A fully functional type system mean it should able to model Category Theory
-properly at compile time.
+properly at type level.
+
 *** Size of output
 If size of the output JavaScript is a concern then
 *Scala.js, GHCJS* are off my list
 
 *** JavaScript Interop
- This is very important since if we want to draw a clear boundary between
+This is very important since if we want to draw a clear boundary between
 React and other language, then we need good support to import that language's
 module into JavaScript code and vice versa so that language can also get
 the benefit from the popular and well supported JavaScript community.
@@ -164,7 +165,4 @@ the benefit from the popular and well supported JavaScript community.
 So *Scala.js, GHCJS, Elm* are off my list
 
 *** So
-There are only PureScript and ReasonML survived. sorry I'm not big fan of
-OCaml syntax so PureScript is probably what I wanted.
-
-
+PureScript is the only survivor which is probably what I wanted.
